@@ -16,7 +16,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"diloretoignacio\",\r\n    \"password\": \"12345678\"\r\n}",
+					"raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"12345678\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -41,11 +41,21 @@
 		{
 			"name": "Registro",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTY5OTk5Mzg3NywiZXhwIjoxNjk5OTk3NDc3fQ.CXpZlB2vDypkJTkrhDa2xFHu8SVizBydA1FHFWdvtD7vn9fTh_1rhH6a0RNCs59DwelIRxYwEkkz2Dx4xRCVJw",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"username\": \"diloretoignacio\",\r\n  \"password\": \"12345678\",\r\n   \"phone\": \"1158257734\",\r\n   \"email\": \"diloretoignacio@gmail.com\"\r\n\r\n}\r\n",
+					"raw": "{\r\n  \"username\": \"diloretoignacio1\",\r\n  \"password\": \"12345678\",\r\n   \"phone\": \"1158257734\",\r\n   \"email\": \"diloretoignacio@gmail.com\"\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -62,6 +72,36 @@
 					"path": [
 						"users",
 						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllUsers",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMDA2IiwibmFtZSI6Imxlb2R1Y2EiLCJyb2xlIjoiQWRtaW5pc3RyYWRvciIsIm5iZiI6MTY2NjE4OTYyNSwiZXhwIjoxNjY2Mjc2MDI1LCJpYXQiOjE2NjYxODk2MjV9.SxUuZGh7Mh-GYKV7y363TCIFJM7WKxGGlXdctno0yWztFDdWLsVcp46BGKEgJdTVEpr_FpUpybcUK3hQaHde8Q",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7051/api/Users",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7051",
+					"path": [
+						"api",
+						"Users"
 					]
 				}
 			},

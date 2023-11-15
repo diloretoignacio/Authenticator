@@ -1,5 +1,6 @@
 package com.example.Autenticator.config;
 
+import com.example.Autenticator.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,10 +9,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import com.example.Autenticator.service.UsuarioService;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -25,19 +26,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(usuarioService).passwordEncoder(passwordEncoder());
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable() // Deshabilitar CSRF para una API REST
-                .authorizeRequests()
-                .antMatchers("/auth/login").permitAll() // Permitir todas las solicitudes a /auth/login
-                .antMatchers("/users/register").permitAll() // Permitir acceso al registro
-                .anyRequest().authenticated()
-                .and()
-                .formLogin().disable() // Deshabilitar el formulario de inicio de sesión
-                .logout().disable(); // Deshabilitar la funcionalidad de cierre de sesión
-    }
-
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     @Override
@@ -45,10 +35,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/auth/login").permitAll()
+                .antMatchers("/users").hasAuthority("ADMIN")
+                .antMatchers("/users/register").hasAuthority("ADMIN") //Solo el administrador puede registrar usuarios
+                .anyRequest().authenticated()
+                .and()
+                .formLogin().disable()
+                .logout().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    }
+
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
 }
-
