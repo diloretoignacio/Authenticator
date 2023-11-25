@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @RestController
 @RequestMapping("users")
 public class UsuarioController {
@@ -32,59 +33,18 @@ public class UsuarioController {
     @Autowired
     private RoleService roleService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
     @PostMapping("register")
     public ResponseEntity<String> registrarUsuario(@RequestBody UserRequest userRequest) {
-
         try {
-            // Verificar si el nombre de usuario ya existe
-            if (usuarioService.existeUsuario(userRequest.getUsername())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El nombre de usuario ya está en uso");
-            }
-
-            // Verificar que los valores no sean nulos ni vacíos
-            if (userRequest.getUsername() == null || userRequest.getPassword() == null ||
-                    userRequest.getUsername().isEmpty() || userRequest.getPassword().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El nombre de usuario y la contraseña son obligatorios");
-            }
-
-            //Registra el nuevo usuario
-            Usuario nuevoUsuario = new Usuario();
-            nuevoUsuario.setUsername(userRequest.getUsername());
-
-            // Encriptar la contraseña y almacenarla
-            String passwordEncriptada = passwordEncoder.encode(userRequest.getPassword());
-            nuevoUsuario.setPassword(passwordEncriptada);
-
-            nuevoUsuario.setPhone(userRequest.getPhone());
-            nuevoUsuario.setEmail(userRequest.getEmail());
-
-            // Obtener el rol por nombre (puedes ajustar esto según tu lógica)
-            Role rolUsuario = roleService.obtenerRolePorNombre("CLASIFICATOR");
-
-            // Asignar el rol al usuario
-            nuevoUsuario.addRole(rolUsuario);
-
-            // Crear el usuario con el rol asociado
-            usuarioService.crearUsuario(nuevoUsuario);
+            usuarioService.crearUsuario(userRequest);
             return ResponseEntity.ok("Usuario registrado exitosamente");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al registrar el usuario");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-
     @GetMapping
     public List<UsuarioResponse> obtenerUsuarios() {
-
         List<Usuario> usuarios = usuarioService.obtenerTodosLosUsuarios();
         return usuarios.stream()
                 .map(this::mapUsuarioToUsuarioResponse)
@@ -102,10 +62,8 @@ public class UsuarioController {
         );
     }
 
-
     @RequestMapping(value = "/", method = RequestMethod.OPTIONS)
     public ResponseEntity<?> handleOptions() {
         return ResponseEntity.ok().allow(HttpMethod.GET).build();
     }
-
 }

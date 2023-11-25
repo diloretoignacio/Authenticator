@@ -19,45 +19,27 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.Autenticator.request.AuthRequest;
-
+import com.example.Autenticator.service.AuthService;
+import com.example.Autenticator.service.JwtService;
 @RestController
 @RequestMapping("auth")
 public class AuthController {
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UsuarioService usuarioService;
+    private AuthService authService;
 
     @PostMapping("login")
     public ResponseEntity<LoginResponse> login(@RequestBody AuthRequest authRequest) {
 
         try {
-            // Crear el token de autenticación
-            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                    new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword());
+            // Autenticar al usuario usando el servicio de autenticación
+            UserDetails userDetails = authService.authenticate(authRequest.getUsername(), authRequest.getPassword());
 
-            // Autenticar el token
-            Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-
-            // Obtener detalles del usuario autenticado
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-            // Obtener el rol del usuario
-            String userRole = usuarioService.obtenerRolPorUsuario(userDetails.getUsername());
-
-            // Generar el token JWT con el rol
-            String token = jwtUtil.generarToken(userDetails.getUsername(), userRole);
+            // Generar el token JWT con el servicio de JWT y obtener el rol del usuario
+            String token = authService.generateToken(userDetails);
 
             // Devolver el token y detalles del usuario en la respuesta
-            LoginResponse loginResponse = new LoginResponse(token, userDetails.getUsername(), userRole);
+            LoginResponse loginResponse = new LoginResponse(token, userDetails.getUsername(), userDetails.getAuthorities().iterator().next().getAuthority());
 
             return ResponseEntity.ok(loginResponse);
         } catch (AuthenticationException e) {

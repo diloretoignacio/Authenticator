@@ -60,6 +60,6 @@ public class JwtUtil {
             return header.replace("Bearer ", "");
         }
 
-        return null;
+        return "vacio";
     }
 }
